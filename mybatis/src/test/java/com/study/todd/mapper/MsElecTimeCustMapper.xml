@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.study.todd.mapper.MsElecTimeCustMapper">
+
+	<resultMap type="com.study.todd.model.MsElecTimeCustModel" id="elecResult">
+		<id column="elec_arc_id" property="elecArcId"/>
+		<result column="elec_id" property="elecId"/>
+		<result column="settle_time" property="settleTime"/>
+		<result column="elec_time" property="elecTime"/>
+		<result column="customer_id" property="customerId"/>
+		<result column="customer_type" property="customerType"/>
+		<result column="trade_cell_id" property="tradeCellId"/>
+		<result column="elec_cons_id" property="elecConsId"/>
+		<result column="meter_id" property="meterId"/>
+		<result column="cons_elec" property="consElec"/>
+		<result column="forward_elec" property="forwardElec"/>
+		<result column="backward_elec" property="backwardElec"/>
+		<result column="ex_flush_red" property="exFlushRed"/>
+		<result column="mk_push_time" property="mkPushTime"/>
+		<result column="confirm_status" property="confirmStatus"/>
+		<result column="ex_check" property="exCheck"/>
+		<result column="settle_version" property="settleVersion"/>
+		<result column="market_id" property="marketId"/>
+		<result column="extract_person" property="extractPerson"/>
+		<result column="extract_time" property="extractTime"/>
+		<result column="settle_date" property="settleDate"/>
+		<result column="release_status" property="releaseStatus"/>
+		<result column="confirm_person" property="confirmPerson"/>
+		<result column="confirm_time" property="confirmTime"/>
+	</resultMap>
+
+	<select id="getOne" resultType="com.study.todd.model.MsElecTimeCustModel">
+		SELECT
+		elec_arc_id AS elecArcId,
+		elec_id AS elecId,
+		settle_time AS settleTime,
+		elec_time AS elecTime,
+		customer_id AS customerId,
+		customer_type AS customerType,
+		trade_cell_id AS tradeCellId,
+		elec_cons_id AS elecConsId,
+		meter_id AS meterId,
+		cons_elec AS consElec,
+		forward_elec AS forwardElec,
+		backward_elec AS backwardElec,
+		ex_flush_red AS exFlushRed,
+		mk_push_time AS mkPushTime,
+		confirm_status AS confirmStatus,
+		ex_check AS exCheck,
+		settle_version AS settleVersion,
+		market_id AS marketId,
+		extract_person AS extractPerson,
+		extract_time AS extractTime,
+		settle_date AS settleDate,
+		release_status AS releaseStatus,
+		confirm_person AS confirmPerson,
+		confirm_time AS confirmTime
+		FROM ms_elec_time_cust
+		where elec_arc_id = #{id}
+	</select>
+
+	<select id="getOneAsResultMap" resultMap="elecResult">
+		SELECT
+		elec_arc_id,
+		elec_id,
+		settle_time,
+		elec_time,
+		customer_id,
+		customer_type,
+		trade_cell_id,
+		elec_cons_id,
+		meter_id,
+		cons_elec,
+		forward_elec,
+		backward_elec,
+		ex_flush_red,
+		mk_push_time,
+		confirm_status,
+		ex_check,
+		settle_version,
+		market_id,
+		extract_person,
+		extract_time,
+		settle_date,
+		release_status,
+		confirm_person,
+		confirm_time
+		FROM ms_elec_time_cust
+		where elec_arc_id = #{id}
+	</select>
+</mapper>

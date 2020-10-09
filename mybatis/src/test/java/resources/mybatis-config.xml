@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config  3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+	<properties>
+		<property name="dataSourceUrl" value="jdbc:mysql://10.92.226.28:3306/scptpms?useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8" />
+	</properties>
+
+
+	<!-- 别名设置  -->
+	<!-- 对于比较复杂的参数 设置一个别名 在使用时会方便一些  -->
+	<typeAliases>
+		<!-- 1、 为String 设置别名 -->
+		<typeAlias type="java.lang.String" alias="str" ></typeAlias>
+
+		<!-- 2、 为我们查询的数据返回实体 设置别名 -->
+		<typeAlias type="com.study.todd.model.MsElecTimeCustModel" alias="model" ></typeAlias>
+
+		<!-- 3、别名设置 值设置实体 则别名为  实体名的首字母小写 -->
+		<typeAlias type="com.study.todd.model.MsElecTimeCustModel"></typeAlias>
+
+		<!-- 4、给一个包下面的实体 设置别名 别名就是实体类的 首字母小写后的名称 -->
+		<!-- MsElecTimeCustModel ==>  msElecTimeCustModel  -->
+		<package name="com.study.todd.model"></package>
+
+		<!-- 5、可以直接在 实体上添加 @Alias("user") 为实体设置别名  -->
+
+	</typeAliases>
+
+	 <typeHandlers>
+     	<typeHandler jdbcType="VARCHAR" javaType="string" handler="com.study.todd.handler.MyStringHandler"/>
+     </typeHandlers>
+
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="com.mysql.jdbc.Driver"/>
+				<property name="url" value="${dataSourceUrl}"/>
+				<property name="username" value="UPTDBMS"/>
+				<property name="password" value="Test#23Ms"/>
+			</dataSource>
+		</environment>
+	</environments>
+
+	<mappers>
+		<mapper resource="com/study/todd/mapper/MsElecTimeCustMapper.xml"/>
+	</mappers>
+</configuration>
