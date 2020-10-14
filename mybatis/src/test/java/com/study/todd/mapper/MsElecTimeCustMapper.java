@@ -11,5 +11,5 @@ public interface MsElecTimeCustMapper {
 
 	MsElecTimeCustModel getOneAsResultMap(@Param("id") String id);
 
-	List<MsElecTimeCustModel> getList();
+//	List<MsElecTimeCustModel> getList();
 }

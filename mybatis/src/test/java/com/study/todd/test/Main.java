@@ -6,7 +6,6 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.apache.velocity.runtime.resource.Resource;
 
 import com.study.todd.mapper.MsElecTimeCustMapper;
 import com.study.todd.model.MsElecTimeCustModel;
@@ -32,10 +31,18 @@ public class Main {
 			sqlSession = sqlSessionFactory.openSession();
 			MsElecTimeCustMapper mapper = sqlSession.getMapper(MsElecTimeCustMapper.class);
 			MsElecTimeCustModel bean = mapper.getOne("1");
-			System.out.println(bean.toString());
+			if (bean != null) {
+				System.out.println(bean.toString());
+			} else {
+				System.out.println("bean is null");
+			}
 
-			MsElecTimeCustModel oneAsResultBean = mapper.getOneAsResultMap("1");
-			System.out.println(oneAsResultBean.toString());
+			MsElecTimeCustModel resultMapBean = mapper.getOneAsResultMap("1");
+			if (resultMapBean != null) {
+				System.out.println(resultMapBean.toString());
+			} else {
+				System.out.println("resultMapBean is null");
+			}
 
 			sqlSession.close();
 		}catch (Exception e) {

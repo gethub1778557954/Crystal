@@ -44,7 +44,24 @@
 		</environment>
 	</environments>
 
+	<!-- 类处理器配置  -->
+<!-- 	<typeHandlers>
+		<typeHandler handler="" javaType="" jdbcType="" />
+		<package name="" />
+	</typeHandlers> -->
+
 	<mappers>
-		<mapper resource="com/study/todd/mapper/MsElecTimeCustMapper.xml"/>
+		<!-- 使用类路径 -->
+<!-- 		<mapper resource="com/study/todd/mapper/MsElecTimeCustMapper.xml"/> -->
+
+		<!-- 绝对url路径 -->
+		<!-- <mapper url="G://files/MsElecTimeCustMapper.xml"/> -->
+
+		<!-- 使用全路径类名 -->
+<!-- 		<mapper class="com.study.todd.mapper.MsElecTimeCustMapper" /> -->
+
+		<!-- 使用包名 -->
+		<package name="com.study.todd.mapper"/>
 	</mappers>
+
 </configuration>
