@@ -1,0 +1,153 @@
+结构分析 https://www.cnblogs.com/mengheng/p/3739610.html
+1、根据源码可分为 三层  
+	1)、接口层(通过工厂 构建sqlSession)
+	2)、核心层(文件解析 配置文件和sqlMapper、SQL执行)
+	3)、基础层(日志logging、io、异常、反射reflection、type类型)、缓存、事务等。
+
+接口层：
+	核心文件 SqlSessionFactory、SqlSession、Configuration
+	
+SqlSessionFactoryBuilder 构建SqlSessionFactory 的工厂，工厂模式
+	一共九个build方法, 三个参数 ： 文件流、environment需要加载的环境、properties 若使用propertie文件则可以通过 ${source} 读取其中的数据
+	前三个复用第四个, 5、6、7复用第八个  
+	第八个和第四个的区别 第四个的第一个Reader换成了InputStream
+		4、8读取配置文件并返回一个Configuration参数
+	第九个 build 是第四个和第八个最终调用的 build方法，参数为 Configuration 最终生成一个 DefaultSqlSessionFactory
+
+XMLConfigBuilder 
+	参数：
+		parsed  是否已解析,
+		parser  XPath解析器,
+		environment  环境参数
+	SqlSessionFactoryBuilder中委托该类来解析XML配置文件 并生成一个所需的 Configuration
+	根据 Stream流、environment、properties 创建 XMLConfigBuilder
+	一共有六个 根据stream流的不同 各三个
+	都通过 this 方法 走到同一个 构造函数中 其第一个参数为 XPathParser (由前六个构造函数参数最多的两个生成的)。
+		先通过父类初始化Configration
+		将错误上下文设置成SQL Mapper Configuration
+		对实体参数进行赋值
+			将Properties全部设置到Configuration里面去
+			设置为未解析 parsed = false
+			环境参数
+			Xpath解析器
+			
+		parse 解析配置
+			首先判断当前实体是否已经解析过。
+			直接读取 配置文件中的第一层 configuration 获得到节点后直接调用下方详细的 配置解析的方法
+			
+		parseConfiguration 解析配置
+			分步骤对配置文件中的标签进行解析 ，通过 configuration 节点获取到子节点进行解析
+				1、properties ==> properties
+				2、类型别名 ==> typeAliases
+				3、插件 ==> plugins
+				4、对象工厂 ==> objectFactory
+				5、对象包装工厂 ==> objectWrapperFactory
+				6、设置 ==> settings
+				7、环境 ==> environments
+				8、databaseIdProvider ==> databaseIdProvider
+				9、类型处理器 ==> typeHandlers
+				10、映射器 ==> mappers
+		1、properties解析
+			构建properties实体
+			先读取properties节点下所有的子节点 子节点均为 property 只有 name value 两个参数 
+			再读取properties节点有没有 设置 resource 和 url 
+			校验 resource 和 url 不能同时配置
+			在将 resource 或 url 中有进行设置的进行读取 保存到 properties实体中 
+				由于properties实体是一个Map 所以读取resource或url中的参数 会覆盖 配置文件中设置的文件
+			将构建SqlSessionFactory时传入参数的properties也加到该方法构建的实体中
+——————————————为什么会将传入的那个properties也加进来 (通过配置文件时并没有传 properties ,其他会有传properties的情况吗？什么时候传？)
+			将读取到的properties数据复制给 当前XMLConfigBuilder 实体的Xpath解析器的variables中 
+			将XMLConfigBuilder实体中的 configuration 赋值为 读取到的properties
+			
+		2、类型别名解析  typeAliasesElement
+			通过 root节点 读取到的是 typeAliases 标签 要读数据的是其子节点 并且会有多个
+			通过 getChildren() 读取到全部 子节点 循环进行读取配置
+				判断是 package 还是 typeAlias 
+				package：
+					TypeAliasRegistry.registerAliases 去包下查所有的类 注册别名 如果有@Alias注解 直接使用 没有的使用类的simpleName
+————————————————————TypeAliasRegistry.registerAliases 具体操作如何实现？
+				typeAlias：
+					读取标签中的 alias type 参数
+					根据 type 读取到对应的类 (会有 alias 不设置的情况)
+						如果 alias 为空 调用不传别名的 别名设置方法 
+							判断有没有用注解 如果有注解使用注解设置的别名 没有就使用simpleName,
+							最后去调用传别名的别名设置方法
+						如果 alias 存在 调用传别名的 别名设置方法
+		
+————————3、插件  ？插件详细用法？
+			1) 可以理解为拦截器，为指定的方法配置一个拦截器  https://blog.csdn.net/qq_36761831/article/details/88375816  
+				简单说就是在执行指定的方法时，可以对properties参数进行覆盖。
+			2) 首先读取 plugins 如果有 循环取子标签 plugin 
+				获取 标签的 interceptor; 
+				获取 其子标签的 properties参数;
+				将 过滤器加到 configuration 的过滤器链(interceptorChain)中。
+		
+————————4、对象工厂 ？具体功能是什么？
+			1) 读取 objectFactory 标签 如果存在 获取标签中配置的 type (指定的对象工厂类) 创建工厂对象
+				如果有子标签properties  循环读取 
+			2) 将参数设置给工厂对象 
+			3) 把工厂对象保存到configuration中。
+		
+————————5、对象包装工厂 ？具体功能是什么？
+			1) 读取 objectWrapperFactory 标签 如果存在 获取 type (指定的对象工厂类) 创建工厂对象
+			2) 把工厂对象保存到configuration中。
+	
+		6、设置 (在configuration中，有许多参数在使用时需要进行修改 例如 是否开启缓存等 可以通过在配置文件中配置setting来设置)
+			1) 读取 settings 标签 如果存在 循环读取子标签 
+			2) 获取Configuration 类中所有的setter方法
+			3) 检查配置的setting标签参数 在configuration类中是否有对应的setter方法
+			4) 一个一个的对参数进行设置 如果有配置setting标签使用setting标签的值 没有配置则使用默认参数。
+		
+		7、环境 (在文件中配置多个环境 例如mysql oracle 等数据库 每个数据库可以是一个环境) 每个环境中都会配置事务管理器和数据源参数。
+			1) 读取 environments 标签 如果有 再判断 初始化时有没有传 environment(环境名参数) 如果没有 将environment设置为 default的值
+			2) 循环获取 environment(可能会配置多个环境) 判断是否有和 environment 相同的 环境Id，如果有则读取这个id中的事务管理器和数据源
+			3) 分别读取 事务管理器和数据源 构建一个environment对象 为configuration设置属性environment参数。
+		
+		8、databaseIdProvider (可以根据不同的数据库执行不同的SQL语句，在sql语句中需要配置databaseId参数，
+								该属性值对应 databaseIdProvider中property 标签的value值)
+			1) 该配置有两种方式，一种就是普通的在xml文件中配置，另一种就是将配置写到一个实体类中，xml配置类路径
+				https://www.cnblogs.com/hellowhy/p/9676037.html
+			2) 读取 databaseIdProvider 标签 如果存在获取 type属性，老版本参数为 VENDOR 新版本为 DB_VENDOR，如果配置的是老参数，更改为新版本参数。
+			3) 读取子标签 并根据type 创建 databaseIdProvider 再将获取到的子标签参数 赋值给databaseIdProvider对象
+			4) 获取configuration中的环境参数，从中获取数据源 读取到数据库Id 把数据库Id直接赋值给configuration。
+		
+————————9、类型处理器当实体类的类型和数据库的类型不统一时，可以根据typeHandlers指定类和数据库理性的对应关系。
+				？如何实现的？不配置时默认的都有哪些配置？  https://www.cnblogs.com/hellowhy/p/9670635.html  
+				用来完成javaType和jdbcType之间的转换
+			1) 读取 typeHandlers 节点 如果有就循环读子节点
+————————————2) 判断 子节点 是 package 还是 typeHandler 去调用入参不同的 register 方法  ？ 方法具体实现？
+		
+		10、映射器 
+			映射器配置方式 1) 类路径； 2) 文件绝对路径url； 3) 类路径； 4) 包名； (配置文件中有展示)
+			1) 读取 mappers 节点 如果存在循环获取子标签
+			2) 判断子标签是不是 package 如果是调用扫描包的方法
+			3) 在不使用包时 每个mapper标签 类路径resource 绝对路径url 类路径class 三个参数只能配置一个
+			4) 根据不同的配置 进行不同的解析。
+
+DefaultSqlSessionFactory 默认的Sql会话工厂
+	(构建该实例 需要一个 configuration 作为参数，具体参数从何来看SqlSessionFactoryBuilder构建sqlSessionFactory时的代码)
+	SqlSessionFactory 的实现类，一个有八个openSession来创建不同的SqlSession实例
+		1、不传参，2、autoCommit 是否自动提交，3、connection 连接，4、TransactionIsolationLevel 事务隔离级别
+		5、ExecutorType执行器类型 
+		6、ExecutorType执行器类型 + autoCommit是否自动提交 
+		7、ExecutorType执行器类型 + TransactionIsolationLevel 事务隔离级别
+		8、ExecutorType执行器类型 + connection 连接
+	DefaultSqlSessionFactory 中 将八种创建实例的方法归结为两个方法实现
+		1、参数中没有 connection 连接 的 openSessionFromDataSource方法
+			两个方法唯一不同的地方就是在创建事务是的参数不同————区别的话看代码？
+		2、参数中存在 connection 连接 的 openSessionFromConnection方法
+			1) 获取 配置Configuration 中的环境参数 environment，
+			2) 根据 environment 获取一个transactionFactory 事务工厂 (getTransactionFactoryFromEnvironment)
+————————————————检查environment有没有 如果没有就 创建一个托管的事务工厂，ManagedTransactionFactory(托管工厂如何实现创建托管事务的？) 有的话直接获取environment中的事务工厂
+			3) 通过事务工厂创建事务
+			4) 通过configuration创建执行器executer
+			5) 通过 参数configuration、executer、是否自动提交参数 创建一个默认的Sql会话 DefaultSqlSession 并返回 
+		？？DefaultExecutorType ————执行器类型，ExecutorType.SIMPLE, REUSE, BATCH 
+SqlSession SQL会话
+	
+BaseBuilder 当前工程 构建器基类
+
+ScriptRunner 脚本运行器,可以运行SQL脚本，如建表，插入数据，作为单元测试的前期准备
+
+	
+	

@@ -45,10 +45,10 @@ public class Main {
 			}
 
 			sqlSession.close();
-		}catch (Exception e) {
+		} catch (Exception e) {
 			sqlSession.close();
 			throw e;
-		}finally {
+		} finally {
 			sqlSession.close();
 		}
 
