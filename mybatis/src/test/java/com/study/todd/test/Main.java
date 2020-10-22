@@ -37,12 +37,12 @@ public class Main {
 				System.out.println("bean is null");
 			}
 
-			MsElecTimeCustModel resultMapBean = mapper.getOneAsResultMap("1");
+			/*MsElecTimeCustModel resultMapBean = mapper.getOneAsResultMap("1");
 			if (resultMapBean != null) {
 				System.out.println(resultMapBean.toString());
 			} else {
 				System.out.println("resultMapBean is null");
-			}
+			}*/
 
 			sqlSession.close();
 		} catch (Exception e) {

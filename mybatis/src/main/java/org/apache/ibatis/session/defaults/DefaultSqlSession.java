@@ -210,7 +210,7 @@ public class DefaultSqlSession implements SqlSession {
     commit(false);
   }
 
-  //核心commit
+  //核心commit  force 是否是 强制执行
   @Override
   public void commit(boolean force) {
     try {

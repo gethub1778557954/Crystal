@@ -143,11 +143,37 @@ DefaultSqlSessionFactory 默认的Sql会话工厂
 			4) 通过configuration创建执行器executer
 			5) 通过 参数configuration、executer、是否自动提交参数 创建一个默认的Sql会话 DefaultSqlSession 并返回 
 		？？DefaultExecutorType ————执行器类型，ExecutorType.SIMPLE, REUSE, BATCH 
-SqlSession SQL会话
-	
+SqlSession SQL会话  实现类 DefaultSqlSession 、 SqlSessionManager
+	单条查询、查询List、查询Map、查询交给ResultHandler、增、删、改、提交、回滚、刷新、关闭、清缓存、获取配置、获取连接、获取Mapper操作
+		DefaultSqlSession 参数：Configuration配置、Executor执行器、autoCommit是否自动提交、dirty脏的？
+		——| selectOne(statement) 调用 selectOne(statement,parameter) 内部调用 selectList(statement, parameter) 
+		——| selectMap(statement, mapKey) 和 selectMap(statement, parameter, mapKey) 都会去调用 
+				selectMap(statement, parameter, mapKey, rowBounds) 内部调用 selectList(statement, parameter) 再转map(？？？？细节)
+		——| selectList(statement, parameter, rowBounds) 核心 selectList 方法，
+				根据 配置 configuration 找到statement 对应的MappedStatement 调用执行器(传入的ResultHandler为空的) 
+				executor.query(ms, wrapCollection(parameter), rowBounds, Executor.NO_RESULT_HANDLER); 
+				executor.query ？？？？？
+				wrapCollection ？？？？？
+		——| select(statement, parameter, rowBounds, handler) 核心select 和selectList 区别就是参数传入了实际的 ResultHandler
+		——| 增删改 核心都是调用的 update核心方法  
+				首先将 dirty 属性 设置为true ； 获得 statement ，执行executor的update方法 参数通过wrapCollection 包装成 Collection
+		——| 提交 调用executor 中的 commit方法  将dirty 设置为false
+		——| 回滚 调用executor 中的 rollback方法 将dirty 设置为false
+		——| 关闭 调用executor 将dirty 设置为false
+		——| 刷新 调用executor 
+		——| 获取配置 直接返回 当前对象的属性
+		——| 获取mapper 调用configuration的getMapper 内部调用的是 mapperRegistry.getMapper
+				mapper在读取配置文件时加入到这个configuration中的
+		——| 获取连接 executor.getTransaction().getConnection();
+		——| 清除缓存 executor.clearLocalCache();
+		
+		
+		
 BaseBuilder 当前工程 构建器基类
 
 ScriptRunner 脚本运行器,可以运行SQL脚本，如建表，插入数据，作为单元测试的前期准备
+
+Executor 执行器接口类
 
 	
 	
