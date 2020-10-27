@@ -163,9 +163,11 @@ SqlSession SQL会话  实现类 DefaultSqlSession 、 SqlSessionManager
 		——| 刷新 调用executor 
 		——| 获取配置 直接返回 当前对象的属性
 		——| 获取mapper 调用configuration的getMapper 内部调用的是 mapperRegistry.getMapper
-				mapper在读取配置文件时加入到这个configuration中的
+————————————————mapper在读取配置文件时加入到这个configuration中的,并且 返回的是mapper对应的 代理类对象。？？？代理类对象
 		——| 获取连接 executor.getTransaction().getConnection();
 		——| 清除缓存 executor.clearLocalCache();
+mapper.* SQL语句执行
+	
 		
 		
 		
@@ -175,5 +177,14 @@ ScriptRunner 脚本运行器,可以运行SQL脚本，如建表，插入数据，
 
 Executor 执行器接口类
 
-	
+
+
+**************************************************************
+反射就是在运行状态中 可以获取到类的所有属性和方法，任意一个对象都可以调用他的属性和方法，这种动态获取信息、调用方法就是反射。
+反射相关类：
+	Class、类的实体，表示类或者接口
+	Field、表示类的属性
+	Method、类中的方法
+	Constructor、构造方法
+
 	
