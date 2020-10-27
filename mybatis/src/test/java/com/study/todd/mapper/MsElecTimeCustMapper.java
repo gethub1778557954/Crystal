@@ -10,6 +10,7 @@ public interface MsElecTimeCustMapper {
 	MsElecTimeCustModel getOne(@Param("id") String id);
 
 	MsElecTimeCustModel getOneAsResultMap(@Param("id") String id);
+	String toString();
 
 //	List<MsElecTimeCustModel> getList();
 }

@@ -9,6 +9,7 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
 import com.study.todd.mapper.MsElecTimeCustMapper;
 import com.study.todd.model.MsElecTimeCustModel;
+import com.study.todd.model.ReflectClass;
 
 public class Main {
 	public static void main(String[] args) {
@@ -31,18 +32,20 @@ public class Main {
 			sqlSession = sqlSessionFactory.openSession();
 			MsElecTimeCustMapper mapper = sqlSession.getMapper(MsElecTimeCustMapper.class);
 			MsElecTimeCustModel bean = mapper.getOne("1");
+			String sstring = mapper.toString();
+			System.out.println(sstring);
 			if (bean != null) {
 				System.out.println(bean.toString());
 			} else {
 				System.out.println("bean is null");
 			}
 
-			/*MsElecTimeCustModel resultMapBean = mapper.getOneAsResultMap("1");
+			MsElecTimeCustModel resultMapBean = mapper.getOneAsResultMap("1");
 			if (resultMapBean != null) {
 				System.out.println(resultMapBean.toString());
 			} else {
 				System.out.println("resultMapBean is null");
-			}*/
+			}
 
 			sqlSession.close();
 		} catch (Exception e) {
@@ -51,6 +54,7 @@ public class Main {
 		} finally {
 			sqlSession.close();
 		}
+		ReflectClass.reflectPrivateMethod();
 
 	}
 
