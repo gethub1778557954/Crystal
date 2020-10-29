@@ -167,6 +167,9 @@ SqlSession SQL会话  实现类 DefaultSqlSession 、 SqlSessionManager
 		——| 获取连接 executor.getTransaction().getConnection();
 		——| 清除缓存 executor.clearLocalCache();
 mapper.* SQL语句执行
+	mapper是一个代理对象，在执行mapper对应的方法时，直接会执行代理类的invoke方法 
+		先判断调用的方法是不是一个Object中的公共方法，如果不是去缓存中获取有没有 对应的 MapperMethod 如果没有就直接new一个返回
+		MapperMethod 执行execute 
 	
 		
 		
@@ -177,6 +180,10 @@ ScriptRunner 脚本运行器,可以运行SQL脚本，如建表，插入数据，
 
 Executor 执行器接口类
 
+MapperMethod
+	SqlCommand
+	
+
 
 
 **************************************************************
@@ -186,5 +193,8 @@ Executor 执行器接口类
 	Field、表示类的属性
 	Method、类中的方法
 	Constructor、构造方法
+************************************************************************************
+代理 设计代理接口，代理类和被代理类都去实现代理接口，代理类在实现接口方法时调用被代理类的方法
+动态代理 https://blog.csdn.net/flyfeifei66/article/details/81481222  
 
-	
+
